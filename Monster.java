@@ -1,4 +1,4 @@
-public abstract class Monster extends Creature {
+public abstract class Monster extends Being {
 	protected int experienceValue;
 	protected int goldValue;
 
@@ -12,14 +12,6 @@ public abstract class Monster extends Creature {
 		this.goldValue = goldValue;
 	}
 
-	// Purpose: Return the monster's calculated damage. If the monster's damage is 10, this is meant to be in the range
-	// of 5 to 15.
-	// Arguments: -
-	// Return: int
-	public int generateDamage() {
-		return this.attack + (int) Math.floor(Math.random() * (this.attack + 1) - this.attack * 0.5);
-	}
-
 	// Purpose: Return the monster's experience value.
 	// Arguments: -
 	// Return: int
@@ -27,8 +19,7 @@ public abstract class Monster extends Creature {
 		return this.experienceValue;
 	}
 
-	// Purpose: Return the monster's calculated loot. If the monster's gold value is 10, this is meant to be in the range
-	// of 5 to 15.
+	// Purpose: Return the monster's calculated loot. (gold ± 50%)
 	// Arguments: -
 	// Return: int
 	public int generateGold() {
@@ -38,7 +29,9 @@ public abstract class Monster extends Creature {
 	// Purpose: Return the monster's reaction to damage.
 	// Arguments: -
 	// Return: String
-	public abstract String painReaction();
+	public String painReaction() {
+		return "- Meep!";
+	}
 
 	// Purpose: Reset the monster's hit points (so far) after being defeated.
 	// Arguments: -

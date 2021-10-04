@@ -1,4 +1,6 @@
-public class Player extends Creature {
+import java.util.ArrayList;
+
+public class Player extends Being {
 	// When setting these, make sure that the levelUp() maxHitPoints never overflows (int).
 	private final int MAX_LEVEL = 10;
 	private final int EXP_PER_LEVEL = 100;
@@ -7,9 +9,9 @@ public class Player extends Creature {
 
 	private int level = 1;
 	private int experience = 0;
+	private int experienceBonus = 0;
 	private int gold = 0;
-
-	private boolean[] equipment;
+	private ArrayList<Product> products = new ArrayList<Product>();
 
 	// Purpose: This is the class' constructor.
 	// Arguments: String name
@@ -18,47 +20,17 @@ public class Player extends Creature {
 		this.maxHitPoints = BASE_MAX_HP;
 		this.hitPoints = BASE_MAX_HP;
 		this.attack = BASE_ATTACK;
-		equipment = new boolean[Equipment.size];
-		// What's the max size of an enum? Is int enough?
-		for (int i = 0; i < Equipment.size; i++) {
-			equipment[i] = false;
-		}
-	}
-
-	// Purpose: This attempts to heal the player.
-	// Arguments: int hitPoints
-	// Return: -
-	public void heal(int hitPoints) {
-		if (!this.isAlive() || hitPoints <= 0) {
-			return;
-		}
-
-		long finalHitPoints = this.hitPoints + hitPoints;
-
-		if (finalHitPoints > this.maxHitPoints) {
-			this.hitPoints = this.maxHitPoints;
-		} else {
-			this.hitPoints = (int) finalHitPoints;
-		}
-	}
-
-	// Purpose: Return the player's calculated damage. If the player's damage is 10, this is meant to be in the range
-	// of 5 to 15.
-	// Arguments: -
-	// Return: int
-	public int generateDamage() {
-		return this.attack + (int) Math.floor(Math.random() * (this.attack + 1) - this.attack * 0.5);
 	}
 
 	private void levelUp() {
 		if (this.level < MAX_LEVEL) {
 			this.level++;
-			this.maxHitPoints = BASE_MAX_HP + (BASE_MAX_HP * (this.level - 1)) / (2 * MAX_LEVEL);
+			this.maxHitPoints = BASE_MAX_HP + Math.round((BASE_MAX_HP * (this.level - 1)) / (2 * MAX_LEVEL));
 			System.out.println("You leveled up, and are now level " + this.level + "!");
 		}
 
-		// This method will heal up the player every EXP_PER_LEVEL even if already at MAX_LEVEL.
-		this.hitPoints = this.maxHitPoints;
+		// This method will heal the player every EXP_PER_LEVEL even if already at MAX_LEVEL.
+		this.heal(BASE_MAX_HP >> 1);
 	}
 
 	// Purpose: Return the player's level.
@@ -75,15 +47,20 @@ public class Player extends Creature {
 		return this.level == MAX_LEVEL;
 	}
 
-	// Purpose: Boost the player's experience and increase their level when appropriate.
+	// Purpose: Boost the player's experience and increase their level when appropriate. The return value indicates the
+	// modified experience after bonus.
 	// Arguments: int experience
-	// Return: -
-	public void giveExperience(int experience) {
-		boolean experienceLoop = true;
-
+	// Return: int
+	public int giveExperience(int experience) {
 		if (this.isAlive() == false || experience < 1) {
-			return;
+			return 0;
 		}
+
+		boolean experienceLoop = true;
+		int bonusedExperience;
+
+		bonusedExperience = experience + this.experienceBonus;
+		experience = bonusedExperience;
 
 		do {
 			// Let's say that the current experience is at 99 and a monster kill just gave 110. This would run twice and
@@ -101,6 +78,8 @@ public class Player extends Creature {
 				experienceLoop = false;
 			}
 		} while (experienceLoop);
+
+		return bonusedExperience;
 	}
 
 	// Purpose: Return the player's experience.
@@ -110,23 +89,38 @@ public class Player extends Creature {
 		return this.experience;
 	}
 
+	// Purpose: Alter the player's experience bonus. If the new bonus would go beyond the boundaries of an int, return
+	// false.
+	// Arguments: int experienceBonus
+	// Return: boolean
+	public boolean alterExperienceBonus(int experienceBonus) {
+		long finalExperienceBonus = this.experienceBonus + experienceBonus;
+
+		if (finalExperienceBonus < Integer.MIN_VALUE || finalExperienceBonus > Integer.MAX_VALUE) {
+			return false;
+		}
+
+		this.experienceBonus = (int) finalExperienceBonus;
+		return true;
+	}
+
 	// Purpose: This changes the player's gold by a certain amount. The return value is whatever gold is left after
 	// hitting 0 or Integer.MAX_VALUE. It should be 0.
 	// Arguments: int gold
 	// Return: int
 	public int alterGold(int gold) {
-		long result = this.gold + gold;
+		long finalGold = this.gold + gold;
 
-		if (result > Integer.MAX_VALUE) {
+		if (finalGold > Integer.MAX_VALUE) {
 			this.gold = Integer.MAX_VALUE;
-			return (int) (result - this.gold);
+			return (int) (finalGold - this.gold);
 		}
 
-		if (result < 0) {
+		if (finalGold < 0) {
 			this.gold = 0;
-			return (int) result;
+			return (int) finalGold;
 		} else {
-			this.gold = (int) result;
+			this.gold = (int) finalGold;
 			return 0;
 		}
 	}
@@ -138,64 +132,60 @@ public class Player extends Creature {
 		return this.gold;
 	}
 
-	// Purpose: Checks if the player owns a certain piece of equipment.
-	// Arguments: Equipment equipment
+	// Purpose: Attempts to give a shop product. The return value indicates the success.
+	// Arguments: Product product
 	// Return: boolean
-	public boolean hasEquipment(Equipment equipment) {
-		return this.equipment[equipment.ordinal()];
-	}
-
-	// Purpose: Gives a piece of equipment. The return value indicates the success.
-	// Arguments: Equipment equipment
-	// Return: boolean
-	public boolean giveEquipment(Equipment equipment) {
-		if (this.equipment[equipment.ordinal()]) {
+	public boolean giveProduct(Product product) {
+		if (!product.isAvailable(this)) {
 			return false;
 		}
 
-		this.equipment[equipment.ordinal()] = true;
-		switch (equipment) {
-			case AMULET_OF_POWER:
-				this.attack += 4;
-				break;
-			case STONESKIN_RING:
-				this.defense += 2;
-				break;
+		// Save only if it's equipment.
+		if (Equipment.class.isInstance(product)) {
+			this.products.add(product);
 		}
+		product.enable(this);
 		return true;
 	}
 
-	// Purpose: Takes a piece of equipment. The return value indicates the success.
-	// Arguments: Equipment equipment
+	// Purpose: Attempts to remove a product (piece of equipment). The return value indicates the success.
+	// Arguments: Product product
 	// Return: boolean
-	public boolean takeEquipment(Equipment equipment) {
-		if (!this.equipment[equipment.ordinal()]) {
-			return false;
+	public boolean takeProduct(Product product) {
+		if (this.products.contains(product)) {
+			product.disable(this);
 		}
 
-		switch (equipment) {
-			case AMULET_OF_POWER:
-				this.attack -= 4;
-				break;
-			case STONESKIN_RING:
-				this.defense -= 2;
-				break;
-		}
-		this.equipment[equipment.ordinal()] = false;
-		return true;
+		return this.products.remove(product); // ArrayList.remove() returns a boolean if the object was found.
+	}
+
+	// Purpose: Checks if the player has a specific product.
+	// Arguments: Product product
+	// Return: boolean
+	public boolean hasProduct(Product product) {
+		return this.products.contains(product);
 	}
 
 	// Purpose: This prints information about the player.
 	// Arguments: -
 	// Return: -
 	public void printDetails() {
+		String equipmentList = "";
+		String separator = ",\n           ";
+		for (int i = 0; i < this.products.size(); i++) {
+			equipmentList += products.get(i).getName() + separator;
+		}
+		equipmentList = (this.products.size() == 0 ? "-" : equipmentList.substring(0, equipmentList.length() - separator.length()));
+
 		System.out.println("     Name: " + this.name);
 		System.out.println("    Level: " + this.level);
 		System.out.println("      Exp: " + this.experience + "/" + EXP_PER_LEVEL);
+		System.out.println("Exp bonus: " + this.experienceBonus);
 		System.out.println("   Health: " + this.hitPoints + "/" + this.maxHitPoints);
 		System.out.println("   Attack: " + this.attack);
 		System.out.println("  Defense: " + this.defense);
-		System.out.println("     Gold: " + this.gold + "\n");
+		System.out.println("     Gold: " + this.gold);
+		System.out.println("Equipment: " + equipmentList + "\n");
 	}
 }
 

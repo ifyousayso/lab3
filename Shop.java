@@ -1,12 +1,15 @@
+// This shop supports 0 to 9 products.
 public class Shop {
 	private static Shop shop;
+	private Product[] products;
 
-	// Prevent uncontrolled creation of Shop instances.
-	private Shop() {}
+	private Shop() {
+		products = new Product[]{AmuletOfPower.get(), StoneskinRing.get(), RepeatingCharmOfRoutine.get(), LesserHeal.get()};
+	}
 
 	// If there's no instance of Shop, create one and return a reference to it.
 	// This ensures that there is only one instance of Shop and that it can be accessed from anywhere.
-	public static Shop getShop() {
+	public static Shop get() {
 		if (Shop.shop == null) {
 			Shop.shop = new Shop();
 		}
@@ -19,62 +22,35 @@ public class Shop {
 	// Arguments: Player player
 	// Return: -
 	public void visit(Player player) {
-		char shopMenuChoice;
+		byte shopMenuChoice;
 		boolean shopMenuLoop = true;
 
 		System.out.println("Welcome! What do you want to buy?");
 
-		// The items, with properties and strings, could be placed in classes of their own, but I'm too lazy …
 		do {
 			System.out.println("You have " + player.getGold() + " gold.\n");
-			System.out.println("1. Amulet of Power (+4 attack): " + (player.hasEquipment(Equipment.AMULET_OF_POWER) ? "out of stock" : "100 gold"));
-			System.out.println("2. Stoneskin Ring (+2 defense): " + (player.hasEquipment(Equipment.STONESKIN_RING) ? "out of stock" : "100 gold"));
-			System.out.println("3. Lesser Heal (+20 hp): " + (player.getHitPoints() == player.getMaxHitPoints() ? "out of stock" : "20 gold"));
+			for (int i = 0; i < products.length; i++) {
+				System.out.println((i + 1) + ". " + products[i].getName() + " (" + products[i].getDescription() + "): " + (products[i].isAvailable(player) ? products[i].getPrice() + " gold" : "out of stock"));
+			}
 			System.out.println("0. Leave the shop");
 			System.out.print("> ");
-			shopMenuChoice = TheGame.parseChar(TheGame.SCANNER.nextLine(), ' ');
+			shopMenuChoice = TheGame.parseDigit(TheGame.SCANNER.nextLine(), (byte) -1);
 			System.out.println();
 
-			switch (shopMenuChoice) {
-				case '1':
-					if (player.hasEquipment(Equipment.AMULET_OF_POWER)) {
-						System.out.println("This item is currently out of stock.");
-					} else if (player.getGold() >= 100) {
-						player.alterGold(-100);
-						player.giveEquipment(Equipment.AMULET_OF_POWER);
-						System.out.println("You equip your brand new Amulet of Power and feel stronger than ever before!");
-					} else {
-						System.out.println("Sorry, you don't have enough gold for this exquisite piece of jewelry.");
-					}
-					break;
-				case '2':
-					if (player.hasEquipment(Equipment.STONESKIN_RING)) {
-						System.out.println("This item is currently out of stock.");
-					} else if (player.getGold() >= 100) {
-						player.alterGold(-100);
-						player.giveEquipment(Equipment.STONESKIN_RING);
-						System.out.println("You equip your brand new Stoneskin Ring and feel tougher than ever before!");
-					} else {
-						System.out.println("Sorry, you don't have enough gold for this exquisite piece of jewelry.");
-					}
-					break;
-				case '3':
-					if (player.getHitPoints() == player.getMaxHitPoints()) {
-						System.out.println("The healer is on vacation and cannot help you today.");
-					} else if (player.getGold() >= 20) {
-						player.alterGold(-20);
-						player.heal(20);
-						System.out.println("You stand still while the healer points at your left nipple,");
-						System.out.println("blasting it with the Lesser Heal spell - current hp: " + player.getHitPoints() + ".");
-					} else {
-						System.out.println("Sorry, you don't have enough gold for this service.");
-					}
-					break;
-				case '0':
-					shopMenuLoop = false;
-					break;
-				default:
-					System.out.println("Please make a valid selection.\n");
+			if (shopMenuChoice < 0 || shopMenuChoice > products.length) {
+				System.out.println("Please make a valid selection.\n");
+			} else if (shopMenuChoice == 0) {
+				shopMenuLoop = false;
+			} else {
+				if (!products[shopMenuChoice - 1].isAvailable(player)) {
+					System.out.println("This item is currently out of stock.");
+				} else if (player.getGold() >= products[shopMenuChoice - 1].getPrice()) {
+					player.alterGold(-products[shopMenuChoice - 1].getPrice());
+					player.giveProduct(products[shopMenuChoice - 1]);
+					products[shopMenuChoice - 1].printGoodBuy();
+				} else {
+					System.out.println("Sorry, you cannot afford " + products[shopMenuChoice - 1].getName() + " at the moment.");
+				}
 			}
 		} while (shopMenuLoop);
 	}

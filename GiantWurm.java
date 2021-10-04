@@ -3,7 +3,7 @@ public class GiantWurm extends Monster {
 	// Arguments: -
 	public GiantWurm() {
 		// name, maxHitPoints, attack, defense, experienceValue, goldValue
-		super("Giant Wurm", 60, 14, 0, 36, 20);
+		super("Giant Wurm", 60, 12, 0, 36, 24);
 	}
 
 	// Purpose: Return the monster's reaction to damage.

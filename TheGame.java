@@ -4,8 +4,8 @@ public class TheGame {
 	// Create a few constants/statics to be used in the main class (everywhere).
 	public static final Scanner SCANNER = new Scanner(System.in);
 
-	public static char parseChar(String subject, char defaultValue) {
-		return subject.length() == 1 ? subject.charAt(0) : defaultValue;
+	public static byte parseDigit(String subject, byte defaultValue) {
+		return (subject.matches("^\\d$") ? Byte.parseByte(subject) : defaultValue);
 	}
 
 	private static void waitForEnter() {
@@ -23,33 +23,26 @@ public class TheGame {
 			System.out.println("You see nothing but swaying grass all around you …");
 			waitForEnter();
 		} else {
-			int playerDamage;
-			int monsterDamage;
 			// Pick a monster at random from the provided list.
 			Monster monster = monsters[(int) Math.floor(Math.random() * monsters.length)];
 			System.out.println("Uh oh! A wild " + monster.getName() + " appeared!");
 			do {
-				playerDamage = player.generateDamage();
-				monster.hurt(playerDamage);
-				System.out.println("You hit the monster, dealing " + playerDamage + " damage.");
+				System.out.println("You hit the monster, dealing " + monster.hurt(player.generateDamage()) + " damage.");
 				if (!monster.isAlive()) {
 					int goldGained = monster.generateGold(); // The gold value is random so it's retrieved only once.
-					System.out.println("You killed the monster, gaining " + monster.getExperienceValue() + " experience and " + goldGained + " gold.");
-					player.giveExperience(monster.getExperienceValue());
+					System.out.println("You killed the monster, gaining " + player.giveExperience(monster.getExperienceValue()) + " experience and " + goldGained + " gold.");
 					// The return value is not used in this game … yet.
 					player.alterGold(goldGained);
 					System.out.println("You are level " + player.getLevel() + ", have " + player.getExperience() + " exp, " + player.getHitPoints() + " hp and " + player.getGold() + " gold.\n");
 					monster.reset();
 					if (player.isLevelMaxed()) {
-						System.out.println("Congratulations! You have beaten The Game!\n");
+						System.out.println("Congratulations! You have beaten The Game …\n");
 						menuLoop = false;
 					}
 					break;
 				}
 				System.out.println(monster.painReaction());
-				monsterDamage = monster.generateDamage();
-				monsterDamage = player.hurt(monsterDamage); // This hurts the player and returns the actual damage dealt.
-				System.out.println("The monster hits you, dealing " + monsterDamage + " damage.");
+				System.out.println("The monster hits you, dealing " + player.hurt(monster.generateDamage()) + " damage.");
 				if (!player.isAlive()) {
 					System.out.println("You were killed by the monster. :(\n");
 					menuLoop = false;
@@ -70,7 +63,7 @@ public class TheGame {
 	// Return: -
 	public static void main(String[] args) {
 		Player player;
-		char mainMenuChoice;
+		byte mainMenuChoice;
 		boolean mainMenuLoop = true;
 		// A Monster array is created in main() and sent to goAdventuring(). In this solution, individual monsters are not
 		// created or destroyed but simply picked for a fight and then reset.
@@ -81,6 +74,7 @@ public class TheGame {
 		System.out.println("************************\n");
 
 		System.out.print("Enter your name, please: ");
+		// The player's name can be empty.
 		player = new Player(SCANNER.nextLine());
 		System.out.println();
 
@@ -90,20 +84,20 @@ public class TheGame {
 			System.out.println("3. Visit the shop");
 			System.out.println("0. Exit to DOS");
 			System.out.print("> ");
-			mainMenuChoice = parseChar(SCANNER.nextLine(), ' ');
+			mainMenuChoice = parseDigit(SCANNER.nextLine(), (byte) -1);
 			System.out.println();
 
 			switch (mainMenuChoice) {
-				case '1':
+				case 1:
 					mainMenuLoop = goAdventuring(player, monsters);
 					break;
-				case '2':
+				case 2:
 					player.printDetails();
 					break;
-				case '3':
-					Shop.getShop().visit(player);
+				case 3:
+					Shop.get().visit(player);
 					break;
-				case '0':
+				case 0:
 					mainMenuLoop = false;
 					break;
 				default:

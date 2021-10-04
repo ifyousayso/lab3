@@ -3,7 +3,7 @@ public class Spooder extends Monster {
 	// Arguments: -
 	public Spooder() {
 		// name, maxHitPoints, attack, defense, experienceValue, goldValue
-		super("Spooder", 40, 20, 0, 30, 22);
+		super("Spooder", 40, 20, 0, 30, 30);
 	}
 
 	// Purpose: Return the monster's reaction to damage.
