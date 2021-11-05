@@ -19,11 +19,11 @@ public abstract class Monster extends Being {
 		return this.experienceValue;
 	}
 
-	// Purpose: Return the monster's calculated loot. (gold ± 50%)
+	// Purpose: Return the monster's calculated loot. (gold ± 25%)
 	// Arguments: -
 	// Return: int
 	public int generateGold() {
-		return this.goldValue + (int) Math.floor(Math.random() * (this.goldValue + 1) - this.goldValue * 0.5);
+		return this.goldValue + (int) Math.floor(Math.random() * ((this.goldValue >> 1) + 1) - (this.goldValue >> 2));
 	}
 
 	// Purpose: Return the monster's reaction to damage.

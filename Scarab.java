@@ -3,7 +3,7 @@ public class Scarab extends Monster {
 	// Arguments: -
 	public Scarab() {
 		// name, maxHitPoints, attack, defense, experienceValue, goldValue
-		super("Scarab", 80, 8, 0, 24, 32);
+		super("Scarab", 32, 8, 8, 24, 32);
 	}
 
 	// Purpose: Return the monster's reaction to damage.

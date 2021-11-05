@@ -21,6 +21,9 @@ public class TheGame {
 		// If 0 (inclusive) to 10 (exclusive) rounded down rolls a 0 … (10%)
 		if (Math.floor(Math.random() * 10) == 0) {
 			System.out.println("You see nothing but swaying grass all around you …");
+			// Heal 1/8 of max health.
+			player.heal(player.getMaxHitPoints() >> 3);
+			System.out.println("This rest allows your wounds to heal somewhat.");
 			waitForEnter();
 		} else {
 			// Pick a monster at random from the provided list.
@@ -30,7 +33,8 @@ public class TheGame {
 				System.out.println("You hit the monster, dealing " + monster.hurt(player.generateDamage()) + " damage.");
 				if (!monster.isAlive()) {
 					int goldGained = monster.generateGold(); // The gold value is random so it's retrieved only once.
-					System.out.println("You killed the monster, gaining " + player.giveExperience(monster.getExperienceValue()) + " experience and " + goldGained + " gold.");
+					System.out.println("The monster dies, resulting in " + (monster.getExperienceValue() + player.getExperienceBonus()) + " experience and " + goldGained + " gold.");
+					player.giveExperience(monster.getExperienceValue());
 					// The return value is not used in this game … yet.
 					player.alterGold(goldGained);
 					System.out.println("You are level " + player.getLevel() + ", have " + player.getExperience() + " exp, " + player.getHitPoints() + " hp and " + player.getGold() + " gold.\n");

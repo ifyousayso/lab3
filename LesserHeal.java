@@ -2,7 +2,7 @@ public class LesserHeal extends Spell {
 	private static LesserHeal lesserHeal;
 
 	private LesserHeal() {
-		super("Lesser Heal", "+20 hp", 20);
+		super("Lesser Heal", "+25 hp", 20);
 	}
 
 	// If there's no instance of LesserHeal, create one and return a reference to it.
@@ -15,11 +15,11 @@ public class LesserHeal extends Spell {
 		return LesserHeal.lesserHeal;
 	}
 
-	// Purpose: Apply this spell's effects on the player.
+	// Purpose: Apply this spell's effects on the player: heal.
 	// Arguments: Player player
 	// Return: -
 	public void enable(Player player) {
-		player.heal(20);
+		player.heal(25);
 	}
 
 	// Purpose: Checks whether this spell can be purchased by the player.

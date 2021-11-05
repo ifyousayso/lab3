@@ -115,11 +115,11 @@ public abstract class Being {
 		return this.defense;
 	}
 
-	// Purpose: Return the being's calculated damage. (damage ± 50%)
+	// Purpose: Return the being's calculated damage. (damage ± 25%)
 	// Arguments: -
 	// Return: int
 	public int generateDamage() {
-		return this.attack + (int) Math.floor(Math.random() * (this.attack + 1) - this.attack * 0.5);
+		return this.attack + (int) Math.floor(Math.random() * ((this.attack >> 1) + 1) - (this.attack >> 2));
 	}
 }
 

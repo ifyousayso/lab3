@@ -3,7 +3,7 @@ public class Pikachu extends Monster {
 	// Arguments: -
 	public Pikachu() {
 		// name, maxHitPoints, attack, defense, experienceValue, goldValue
-		super("Pikachu", 30, 16, 0, 16, 16);
+		super("Pikachu", 24, 16, 0, 16, 20);
 	}
 
 	// Purpose: Return the monster's reaction to damage.

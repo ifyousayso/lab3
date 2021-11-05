@@ -11,18 +11,18 @@ public abstract class Product {
 		this.price = price;
 	}
 
-	// Purpose: Retrieve the product's description for the shop.
-	// Arguments: -
-	// Return: String
-	public final String getDescription() {
-		return this.description;
-	}
-
 	// Purpose: Return the product's name.
 	// Arguments: -
 	// Return: String
 	public final String getName() {
 		return this.name;
+	}
+
+	// Purpose: Retrieve the product's description for the shop.
+	// Arguments: -
+	// Return: String
+	public final String getDescription() {
+		return this.description;
 	}
 
 	// Purpose: Return the product's price.

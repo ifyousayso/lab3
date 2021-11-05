@@ -5,7 +5,8 @@ public class Player extends Being {
 	private final int MAX_LEVEL = 10;
 	private final int EXP_PER_LEVEL = 100;
 	private final int BASE_MAX_HP = 100;
-	private final int BASE_ATTACK = 20;
+	private final int BASE_ATTACK = 16;
+	private final int BASE_DEFENSE = 0;
 
 	private int level = 1;
 	private int experience = 0;
@@ -20,17 +21,18 @@ public class Player extends Being {
 		this.maxHitPoints = BASE_MAX_HP;
 		this.hitPoints = BASE_MAX_HP;
 		this.attack = BASE_ATTACK;
+		this.defense = BASE_DEFENSE;
 	}
 
 	private void levelUp() {
 		if (this.level < MAX_LEVEL) {
+			// A level-up gives some max hp, +1 attack and +1 defense.
 			this.level++;
-			this.maxHitPoints = BASE_MAX_HP + Math.round((BASE_MAX_HP * (this.level - 1)) / (2 * MAX_LEVEL));
-			System.out.println("You leveled up, and are now level " + this.level + "!");
+			this.maxHitPoints = BASE_MAX_HP + Math.round((BASE_MAX_HP * (this.level - 1)) / (MAX_LEVEL << 1));
+			this.attack++;
+			this.defense++;
+			System.out.println("Enough experience has piled up and you are now level " + this.level + "!");
 		}
-
-		// This method will heal the player every EXP_PER_LEVEL even if already at MAX_LEVEL.
-		this.heal(BASE_MAX_HP >> 1);
 	}
 
 	// Purpose: Return the player's level.
@@ -102,6 +104,13 @@ public class Player extends Being {
 
 		this.experienceBonus = (int) finalExperienceBonus;
 		return true;
+	}
+
+	// Purpose: Return the player's experience bonus.
+	// Arguments: -
+	// Return: int
+	public int getExperienceBonus() {
+		return this.experienceBonus;
 	}
 
 	// Purpose: This changes the player's gold by a certain amount. The return value is whatever gold is left after

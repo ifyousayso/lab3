@@ -20,11 +20,7 @@ public abstract class Equipment extends Product {
 	// Arguments: Player player
 	// Return: boolean
 	public boolean isAvailable(Player player) {
-		if (player.hasProduct(this)) {
-			return false;
-		}
-
-		return true;
+		return !player.hasProduct(this);
 	}
 
 	// Purpose: Print a message when buying this equipment.
